@@ -558,7 +558,11 @@ def load_and_train_models2():
     n_estimators = 10
     learning_rate = 0.2
     max_depth = 2
-
+    #test_size = 0.3
+    #random_seed = 42
+    #n_estimators = 10
+    #learning_rate = 0.2
+    #max_depth = 2 85.28
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
@@ -571,7 +575,10 @@ def load_and_train_models2():
     )
 
 
-
+     #RANDOM SEED   938
+    #N ESTIMATORS 511
+    #LR 0.20
+    #MAX DEPTH6 82.94
     # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
@@ -1013,13 +1020,16 @@ def gbm_tuning(X,y):
     #current highest sa gbm is random seed 42,n estimators 10,lr 0.2 , md = 2
     test_size = 0.2
     random_seed = st.slider("Random seed",min_value=1,max_value=1000,value=42) 
-    n_estimators =  st.slider("N Estimators",min_value=1,max_value=1000,value=100) 
+    n_estimators =  st.slider("N Estimators",min_value=1,max_value=1000,value=10,step=10) 
     learning_rate =  st.number_input("Learning Rate",min_value=0.005,max_value=1.00,value=0.2) 
-    max_depth =  st.slider("Max Depth",min_value=1,max_value=100,value=10) 
+    max_depth =  st.slider("Max Depth",min_value=1,max_value=100,value=2) 
     #result atm 11/30 2:35 is 79.26
     # Train-test split
     
-    
+    #RANDOM SEED   938
+    #N ESTIMATORS 511
+    #LR 0.20
+    #MAX DEPTH6 82.94
   
     # Initialize the Gradient Boosting Classifier
     model = GradientBoostingClassifier(
