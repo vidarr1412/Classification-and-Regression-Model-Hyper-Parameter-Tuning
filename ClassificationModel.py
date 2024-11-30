@@ -148,10 +148,13 @@ def load_and_train_models():
     #gradient
     test_size = 0.3
     random_seed = 42
-    n_estimators = 10
+    n_estimators = 20
     learning_rate = 0.2
-    max_depth = 2
-
+    max_depth = 3
+    #RANDOM SEED   42
+    #N ESTIMATORS 20
+    #LR 0.20
+    #MAX DEPTH6 82.94
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
@@ -555,9 +558,9 @@ def load_and_train_models2():
     #gradient
     test_size = 0.3
     random_seed = 42
-    n_estimators = 10
+    n_estimators = 20
     learning_rate = 0.2
-    max_depth = 2
+    max_depth = 3
     #test_size = 0.3
     #random_seed = 42
     #n_estimators = 10
@@ -854,30 +857,119 @@ def load_and_train_models2():
 
 def stage1():
     
-    st.title("Heart Failure Model Training ")
+    st.markdown("<h1 style='text-align: center;'>Heart Failure Classification Model Tester and Trainer</h1>", unsafe_allow_html=True)
+    st.sidebar.title("NAVIGATION")
 
+    if st.sidebar.button("Model Table Summary"):
+         
+        st.rerun() 
+    elif st.sidebar.button("Model Comparison Graph"):
+        st.session_state.stage = 2
+        st.rerun() 
+    elif st.sidebar.button("Model Hyper Parameter Tunning"):
+        st.session_state.stage = 3
+        st.rerun() 
+    elif st.sidebar.button("Model Prediction"):
+        st.session_state.stage = 4
+        st.rerun() 
     st.success("Dataset loaded successfully!")
     # Load data and train models using cached function
     # Load data and train models using cached function
-    accuracies = load_and_train_models()
+    accuracies2 = load_and_train_models2()
 
     # Display the dataframe only once here in Stage 1
     
     
 
     # Display the accuracies in a dataframe format
-    accuracy_df = pd.DataFrame(accuracies)
-    st.write("Accuracy Results:", accuracy_df)
-
+   
     
-    # Button to proceed to Stage 2
-    if st.button("Proceed to Model Accuracy Comparison"):
-        st.session_state.stage = 2  # Set stage to 2
-        st.rerun()  # Trigger a rerun to go to Stage 2
-# Stage 2: Show the accuracy comparison as a bar chart
-def stage2():
-    st.title("Model Accuracy Comparison")
+    accuracy_df = pd.DataFrame(accuracies2)
 
+    # Find the min and max MAE
+    min_mae = accuracy_df["Mean Accuracy"].min()
+    max_mae = accuracy_df["Mean Accuracy"].max()
+
+    # Apply highlighting to the DataFrame
+    def highlight_mae(row):
+        if row["Mean Accuracy"] == max_mae:
+            return ['background-color: green; color: white;'] * len(row)
+        
+        else:
+            return [''] * len(row)
+
+    # Style the DataFrame
+    styled_df = accuracy_df.style.apply(highlight_mae, axis=1)
+
+    # Display the table with a title
+    st.write("Table 1. Machine Learning MAE Results")
+    st.dataframe(styled_df)
+    
+
+    if "accuracies2" not in st.session_state:
+        st.error("No accuracy data found. Please go back to Stage 1.")
+        return  # Exit if accuracies are not available+
+    
+    
+    
+# Get the stored accuracies from session state
+    accuracies2 = st.session_state.accuracies2
+
+    # Extract numeric accuracies and find the lowest and highest one
+    try:
+        accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
+        
+        # Find the lowest accuracy
+        lowest_accuracy = min(accuracies_numeric)
+        lowest_model_index = accuracies_numeric.index(lowest_accuracy)
+        lowest_model_name = accuracies2[lowest_model_index]["Model"]
+        
+        # Find the highest accuracy
+        highest_accuracy = max(accuracies_numeric)
+        highest_model_index = accuracies_numeric.index(highest_accuracy)
+        highest_model_name = accuracies2[highest_model_index]["Model"]
+        st.markdown("<p style='font-size:12px;margin-top:30px'>"
+                " </p>", 
+                unsafe_allow_html=True)
+        # Create the justified text with color highlights
+        message = f"""
+        <div style="text-align: justify;">
+            The table highlights 10 Machine Learning algorithms with Mean Absolute Error (MAE) results. 
+            The <span style="color: green; font-weight: bold;">{lowest_model_name}</span> yields the lowest MAE 
+            (<span style="color: green; font-weight: bold;">{lowest_accuracy}%</span>), showcasing high accuracy. 
+            Meanwhile, the <span style="color: red; font-weight: bold;">{highest_model_name}</span> has the highest MAE 
+            (<span style="color: red; font-weight: bold;">{highest_accuracy}%</span>), suggesting it has the lowest accuracy 
+            among the 10 models trained.
+        </div>
+        """
+        
+        # Display the styled message
+        st.markdown(message, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+    st.markdown("<p style='font-size:12px;margin-top:30px'>"
+                " </p>", 
+                unsafe_allow_html=True)
+    # Button to proceed to Stage 2
+    
+# Stage 2: Show the accuracy comparison as a bar chart
+import plotly.graph_objects as go
+def stage2():
+    st.markdown("<h1 style='text-align: center;'>Heart Failure Classification Model Tester and Trainer</h1>", unsafe_allow_html=True)
+    st.sidebar.title("NAVIGATION")
+
+    if st.sidebar.button("Model Table Summary"):
+        st.session_state.stage = 1
+        st.rerun() 
+    elif st.sidebar.button("Model Comparison Graph"):
+    
+        st.rerun() 
+    elif st.sidebar.button("Model Hyper Parameter Tunning"):
+        st.session_state.stage = 3
+        st.rerun() 
+    elif st.sidebar.button("Model Prediction"):
+        st.session_state.stage = 4
+        st.rerun() 
     # Ensure that accuracies are available from session state
     if "accuracies2" not in st.session_state:
         st.error("No accuracy data found. Please go back to Stage 1.")
@@ -886,47 +978,113 @@ def stage2():
     # Get the stored accuracies from session state
     accuracies2 = st.session_state.accuracies2
 
-    # Create a bar graph
+    accuracies2 = st.session_state.accuracies2
+
+    #Bar Graph
     models = [accuracy["Model"] for accuracy in accuracies2]
     accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
+    # Create a Plotly bar chart
+    max_mae = max(accuracies_numeric)
+    min_mae = min(accuracies_numeric)
 
-    fig, ax = plt.subplots()
-    ax.bar(models, accuracies_numeric, color='skyblue', width=0.5)
-    ax.set_title("Model Mean Accuracies", color='white')
-    ax.set_xlabel("Model", color='white')
-    ax.set_ylabel("Mean Accuracy (%)", color='white')
-    ax.set_ylim(0, 100)
-    plt.xticks(rotation=25, color='white')
-    plt.yticks(color='white')
+    # Create a color list for the bars
+    colors = ['red' if accuracy == max_mae else 'green' if accuracy == min_mae else 'skyblue' for accuracy in accuracies_numeric]
 
-    # Set the color of the axis lines to white
-    ax.spines['top'].set_color('white')
-    ax.spines['right'].set_color('white')
-    ax.spines['left'].set_color('white')
-    ax.spines['bottom'].set_color('white')
+    fig = go.Figure()
 
-    # Make the background transparent
-    fig.patch.set_facecolor('none')
-    ax.patch.set_facecolor('none')
+    # Add the bar chart
+    fig.add_trace(go.Bar(
+        x=models,
+        y=accuracies_numeric,
+        marker=dict(color=colors),
+        hoverinfo='x+y',  # This ensures only model and MAE are shown in hover
+    ))
 
-    # Display the bar graph in Streamlit
-    st.pyplot(fig)
+    # Set title and labels with larger font sizes
+    fig.update_layout(
+        title="Model Accuracy Comparison",
+        title_font=dict(size=30, color='white'),
+        title_x=0.25,  # Centers the title
+        xaxis_title="Model",
+        xaxis_title_font=dict(size=30, color='white'),
+        yaxis_title="Mean Accuracy",
+        yaxis_title_font=dict(size=30, color='white'),
+        xaxis=dict(tickangle=25, tickfont=dict(size=15, color='white')),
+         yaxis=dict(
+        tickfont=dict(size=15, color='white'),
+        tickvals=[0, 20,40,60,80,100],  # Custom y-axis tick values
+        range=[0, 100],  
+    ),
+        plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        width=1400,  # Set the width of the figure
+        height=600,  # Set the height of the figure
+    )
+
+    # Make the bars zoom in when hovered by adding hover effects
+    
+    # Display the Plotly figure in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
 
     # Button to go back to Stage 1
-    if st.button("Go Back to Page 1"):
-        st.session_state.stage = 1  # Set stage to 1
-        st.rerun()  # Trigger a rerun to go back to Stage 1
-
-    # Button to proceed to further stages
-     # Button to proceed to Stage 2
-    if st.button("Proceed to Hyperparameter Tuning"):
-        st.session_state.stage = 3  # Set stage to 2
-        st.rerun()  # Trigger a rerun to go to Stage 2
-
+    st.markdown("<p style='font-size:12px;margin-top:30px'>"
+                " </p>", 
+                unsafe_allow_html=True)
+    st.markdown("<h5 style='text-align: center;'>Figure 1. Bar Chart of the Model Comparison of the MAE Results</h5>", unsafe_allow_html=True)
+    try:
+        accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
+        
+        # Find the lowest accuracy
+        lowest_accuracy = min(accuracies_numeric)
+        lowest_model_index = accuracies_numeric.index(lowest_accuracy)
+        lowest_model_name = accuracies2[lowest_model_index]["Model"]
+        
+        # Find the highest accuracy
+        highest_accuracy = max(accuracies_numeric)
+        highest_model_index = accuracies_numeric.index(highest_accuracy)
+        highest_model_name = accuracies2[highest_model_index]["Model"]
+        
+        # Create the justified text with color highlights
+        message = f"""
+        <div style="text-align: justify;">
+            The table highlights 10 Machine Learning algorithms with Mean Absolute Error (MAE) results. 
+            The <span style="color: green; font-weight: bold;">{lowest_model_name}</span> yields the lowest MAE 
+            (<span style="color: green; font-weight: bold;">{lowest_accuracy} </span>), showcasing high accuracy. 
+            Meanwhile, the <span style="color: red; font-weight: bold;">{highest_model_name}</span> has the highest MAE 
+            (<span style="color: red; font-weight: bold;">{highest_accuracy} </span>), suggesting it has the lowest accuracy 
+            among the 10 models trained.
+        </div>
+        """
+        
+        # Display the styled message
+        st.markdown(message, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+    # Button to go back to Stage 1.
+    st.markdown("<p style='font-size:12px;margin-top:30px'>"
+                " </p>", 
+                unsafe_allow_html=True)
+    
+    
 # Stage 3: Model selection and hyperparameter tuning
 def stage3():
-    st.title("Model Hyper Parameter Tuning")
+    st.markdown("<h1 style='text-align: center;'>Heart Failure Classification Model Tester and Trainer</h1>", unsafe_allow_html=True)
+    st.subheader("Model Hyper Parameter Tuning")
     # Load model accuracies
+    st.sidebar.title("NAVIGATION")
+
+    if st.sidebar.button("Model Table Summary"):
+        st.session_state.stage = 1
+        st.rerun() 
+    elif st.sidebar.button("Model Comparison Graph"):
+        st.session_state.stage = 2
+        st.rerun() 
+    elif st.sidebar.button("Model Hyper Parameter Tunning"):
+        
+        st.rerun() 
+    elif st.sidebar.button("Model Prediction"):
+        st.session_state.stage = 4
+        st.rerun() 
     accuracies2 = load_and_train_models2()
 
     if "accuracies2" not in st.session_state:
@@ -1018,19 +1176,73 @@ def gaussian_nb_tuning(X, y):
 def gbm_tuning(X,y):
     #goal is ma labwan ni82.61%
     #current highest sa gbm is random seed 42,n estimators 10,lr 0.2 , md = 2
+    
+    if st.button("Original Review Table Summary"):
+        accuracies2 = st.session_state.accuracies2
+
+        #Bar Graph
+        models = [accuracy["Model"] for accuracy in accuracies2]
+        accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
+        # Create a Plotly bar chart
+        max_mae = max(accuracies_numeric)
+        min_mae = min(accuracies_numeric)
+
+        # Create a color list for the bars
+        colors = ['red' if accuracy == max_mae else 'green' if accuracy == min_mae else 'skyblue' for accuracy in accuracies_numeric]
+
+        fig = go.Figure()
+
+        # Add the bar chart
+        fig.add_trace(go.Bar(
+            x=models,
+            y=accuracies_numeric,
+            marker=dict(color=colors),
+            hoverinfo='x+y',  # This ensures only model and MAE are shown in hover
+        ))
+
+        # Set title and labels with larger font sizes
+        fig.update_layout(
+            title="Model Accuracy Comparison",
+            title_font=dict(size=30, color='white'),
+            title_x=0.25,  # Centers the title
+            xaxis_title="Model",
+            xaxis_title_font=dict(size=30, color='white'),
+            yaxis_title="Mean Accuracy",
+            yaxis_title_font=dict(size=30, color='white'),
+            xaxis=dict(tickangle=25, tickfont=dict(size=15, color='white')),
+            yaxis=dict(
+            tickfont=dict(size=15, color='white'),
+            tickvals=[0, 20,40,60,80,100],  # Custom y-axis tick values
+            range=[0, 100],  
+        ),
+            plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+            width=1400,  # Set the width of the figure
+            height=600,  # Set the height of the figure
+        )
+
+        # Make the bars zoom in when hovered by adding hover effects
+        
+        # Display the Plotly figure in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
+
+    
+    if st.button("close"):
+        st.plotly_chart(fig, use_container_width=False)
+            # Display the Plotly figure in Streamlit
     test_size = 0.2
     random_seed = st.slider("Random seed",min_value=1,max_value=1000,value=42) 
-    n_estimators =  st.slider("N Estimators",min_value=1,max_value=1000,value=10,step=10) 
-    learning_rate =  st.number_input("Learning Rate",min_value=0.005,max_value=1.00,value=0.2) 
-    max_depth =  st.slider("Max Depth",min_value=1,max_value=100,value=2) 
+    n_estimators =  st.slider("N Estimators",min_value=10,max_value=500,value=20,step=10) 
+    learning_rate =  st.number_input("Learning Rate",min_value=0.005,max_value=1.00,value=0.20) 
+    max_depth =  st.slider("Max Depth",min_value=1,max_value=50,value=3) 
     #result atm 11/30 2:35 is 79.26
     # Train-test split
     
-    #RANDOM SEED   938
-    #N ESTIMATORS 511
+    #RANDOM SEED   42
+    #N ESTIMATORS 20
     #LR 0.20
     #MAX DEPTH6 82.94
-  
+
     # Initialize the Gradient Boosting Classifier
     model = GradientBoostingClassifier(
         n_estimators=n_estimators,
@@ -1174,7 +1386,9 @@ def perform_loocv(X, y, model, model_name):
     accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     st.write(f"The model with the highest accuracy is : {model_name}, with a mean Accuracy: {accuracy * 100:.2f}%")
-
+    st.markdown("<p style='font-size:12px;margin-top:30px'>"
+                " </p>", 
+                unsafe_allow_html=True)
     model_filename = "classificationmodel.joblib"
     joblib.dump(model, model_filename)
 
@@ -1187,18 +1401,23 @@ def perform_loocv(X, y, model, model_name):
         file_name=model_filename,
         mime="application/octet-stream"
     )
-    if st.button("Go Back to Model Comparison"):
-        st.session_state.stage = 2  # Set stage to 1
-        st.rerun()  # Trigger a rerun to go back to Stage 1
-
-    # Button to proceed to further stages
-     # Button to proceed to Stage 2
-    if st.button("Go to Heart Failure Prediction Application"):
-        st.session_state.stage = 4  # Set stage to 2
-        st.rerun()  # Trigger a rerun to go to Stage 2
+    
 def stage4():
     # Load model accuracies
-    
+    st.sidebar.title("NAVIGATION")
+
+    if st.sidebar.button("Model Table Summary"):
+        st.session_state.stage = 1
+        st.rerun() 
+    elif st.sidebar.button("Model Comparison Graph"):
+        st.session_state.stage = 2
+        st.rerun() 
+    elif st.sidebar.button("Model Hyper Parameter Tunning"):
+        st.session_state.stage = 3
+        st.rerun() 
+    elif st.sidebar.button("Model Prediction"):
+        
+        st.rerun() 
     st.title("Heart Failure Prediction Application")
     # Extract numeric accuracies and find the highest one
     # Step 1: Upload the pre-trained model
@@ -1255,15 +1474,6 @@ def stage4():
         st.write("Probability of Heart Failure:", predicted_probabilities)
 
 
-    if st.button("Go Back to Model Comparison"):
-        st.session_state.stage = 3  # Set stage to 1
-        st.rerun()  # Trigger a rerun to go back to Stage 1
-
-    # Button to proceed to further stages
-     # Button to proceed to Stage 2
-    if st.button("Go to Heart Failure Prediction Application"):
-        st.session_state.stage = 1  # Set stage to 2
-        st.rerun()  # Trigger a rerun to go to Stage 2
 # Ensure session state tracking
 if "stage" not in st.session_state:
     st.session_state.stage = 1  # Default to Stage 1

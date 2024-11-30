@@ -322,9 +322,7 @@ def stage1():
         st.markdown(message, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"An error occurred: {e}")
-    if st.button("Go Next"):
-        st.session_state.stage = 2 
-        st.rerun() 
+    
 # Stage 2: Show the accuracy comparison as a bar chart
 import plotly.graph_objects as go
 def stage2():
@@ -434,6 +432,7 @@ def stage2():
      # Button to proceed to Stage 2
    
 def stage3():
+    st.markdown("<h1 style='text-align: center;'>Sea Level Regression Model Tester and Trainer</h1>", unsafe_allow_html=True)
     st.title("Model Hyper Parameter Tuning")
    
     accuracies2 = load_train_models2()
