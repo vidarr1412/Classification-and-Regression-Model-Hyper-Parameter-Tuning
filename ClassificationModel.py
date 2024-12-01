@@ -934,11 +934,11 @@ def stage1():
         # Create the justified text with color highlights
         message = f"""
         <div style="text-align: justify;">
-            The table highlights 10 Machine Learning algorithms with Mean Absolute Error (MAE) results. 
-            The <span style="color: green; font-weight: bold;">{lowest_model_name}</span> yields the lowest MAE 
-            (<span style="color: green; font-weight: bold;">{lowest_accuracy}%</span>), showcasing high accuracy. 
-            Meanwhile, the <span style="color: red; font-weight: bold;">{highest_model_name}</span> has the highest MAE 
-            (<span style="color: red; font-weight: bold;">{highest_accuracy}%</span>), suggesting it has the lowest accuracy 
+            The table highlights 10 Machine Learning algorithms with Mean Accuracy results. 
+            The <span style="color: red; font-weight: bold;">{lowest_model_name}</span> yields the lowest mean accuracy 
+            (<span style="color: red; font-weight: bold;">{lowest_accuracy}% </span>), suggesting that it might not be ideal to use the model in predicting. 
+            Meanwhile, the <span style="color: green; font-weight: bold;">{highest_model_name}</span> has the highest mean accuracy 
+            (<span style="color: green; font-weight: bold;">{highest_accuracy}%</span>), suggesting that it performs well in training and testing as well as in prediction
             among the 10 models trained.
         </div>
         """
@@ -984,11 +984,12 @@ def stage2():
     models = [accuracy["Model"] for accuracy in accuracies2]
     accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
     # Create a Plotly bar chart
-    max_mae = max(accuracies_numeric)
-    min_mae = min(accuracies_numeric)
+    max_accuracy = max(accuracies_numeric)
+    min_accuracy = min(accuracies_numeric)
 
-    # Create a color list for the bars
-    colors = ['red' if accuracy == max_mae else 'green' if accuracy == min_mae else 'skyblue' for accuracy in accuracies_numeric]
+        # Create a color list for the bars
+    colors = ['green' if accuracy == max_accuracy else 'red' if accuracy == min_accuracy else 'skyblue' for accuracy in accuracies_numeric]
+
 
     fig = go.Figure()
 
@@ -1047,11 +1048,11 @@ def stage2():
         # Create the justified text with color highlights
         message = f"""
         <div style="text-align: justify;">
-            The table highlights 10 Machine Learning algorithms with Mean Absolute Error (MAE) results. 
-            The <span style="color: green; font-weight: bold;">{lowest_model_name}</span> yields the lowest MAE 
-            (<span style="color: green; font-weight: bold;">{lowest_accuracy} </span>), showcasing high accuracy. 
-            Meanwhile, the <span style="color: red; font-weight: bold;">{highest_model_name}</span> has the highest MAE 
-            (<span style="color: red; font-weight: bold;">{highest_accuracy} </span>), suggesting it has the lowest accuracy 
+            The table highlights 10 Machine Learning algorithms with Mean Accuracy results. 
+            The <span style="color: red; font-weight: bold;">{lowest_model_name}</span> yields the lowest mean accuracy
+            (<span style="color: red; font-weight: bold;">{lowest_accuracy}% </span>), suggesting the model performance is not ideal in using. 
+            Meanwhile, the <span style="color: green; font-weight: bold;">{highest_model_name}</span> has the highest mean accuracy 
+            (<span style="color: green; font-weight: bold;">{highest_accuracy}%</span>), suggesting it performs a highly accurate prediction 
             among the 10 models trained.
         </div>
         """
@@ -1184,11 +1185,11 @@ def gbm_tuning(X,y):
         models = [accuracy["Model"] for accuracy in accuracies2]
         accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
         # Create a Plotly bar chart
-        max_mae = max(accuracies_numeric)
-        min_mae = min(accuracies_numeric)
+        max_accuracy = max(accuracies_numeric)
+        min_accuracy = min(accuracies_numeric)
 
         # Create a color list for the bars
-        colors = ['red' if accuracy == max_mae else 'green' if accuracy == min_mae else 'skyblue' for accuracy in accuracies_numeric]
+        colors = ['green' if accuracy == max_accuracy else 'red' if accuracy == min_accuracy else 'skyblue' for accuracy in accuracies_numeric]
 
         fig = go.Figure()
 
@@ -1227,9 +1228,9 @@ def gbm_tuning(X,y):
         st.plotly_chart(fig, use_container_width=True)
 
     
-    if st.button("close"):
-        st.plotly_chart(fig, use_container_width=False)
-            # Display the Plotly figure in Streamlit
+        if st.button("close"):
+            st.plotly_chart(fig, use_container_width=False)
+                # Display the Plotly figure in Streamlit
     test_size = 0.2
     random_seed = st.slider("Random seed",min_value=1,max_value=1000,value=42) 
     n_estimators =  st.slider("N Estimators",min_value=10,max_value=500,value=20,step=10) 
@@ -1250,7 +1251,7 @@ def gbm_tuning(X,y):
         max_depth=max_depth,
         random_state=random_seed
     )
-    perform_loocv(X, y, model, "gbm")
+    perform_loocv(X, y, model, "Gradient Boosting Machine")
 
 
 
@@ -1471,7 +1472,7 @@ def stage4():
         else:
             st.write("Prediction: The patient is unlikely to have heart failure.")
 
-        st.write("Probability of Heart Failure:", predicted_probabilities)
+        
 
 
 # Ensure session state tracking

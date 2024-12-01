@@ -657,11 +657,11 @@ def lasso_tuning(X, y):
             alpha_slider = st.slider("Alpha (Lasso Regularization)", min_value=0.01, max_value=100.0, value=0.1, step=0.01)
 
             # Initialize and train Lasso Regressor
-            lasso_regressor = Lasso(alpha=alpha_slider)
-            lasso_regressor.fit(X_train, y_train)
+            model = Lasso(alpha=alpha_slider)
+            model.fit(X_train, y_train)
 
             # Make predictions and calculate MAE
-            y_pred = lasso_regressor.predict(X_test)
+            y_pred = model.predict(X_test)
             mae = mean_absolute_error(y_test, y_pred)
 
             # Display results
@@ -720,13 +720,13 @@ def ridge_tuning(X, y):
             # Loop through each alpha value
             for alpha in alpha_values:
                 # Initialize the Ridge regressor with the current alpha value
-                ridge_regressor = Ridge(alpha=alpha)
+                model = Ridge(alpha=alpha)
                 
                 # Fit the model to the training data
-                ridge_regressor.fit(X_train, y_train)
+                model.fit(X_train, y_train)
                 
                 # Make predictions on the test set
-                y_pred = ridge_regressor.predict(X_test)
+                y_pred = model.predict(X_test)
                 
                 # Calculate Mean Absolute Error (MAE)
                 mae = mean_absolute_error(y_test, y_pred)
@@ -735,7 +735,7 @@ def ridge_tuning(X, y):
                 if mae < best_mae:
                     best_mae = mae
                     best_alpha = alpha
-                    best_model = ridge_regressor
+                    best_model = model
 
                         
                 st.subheader("Conclusion")
@@ -1195,8 +1195,7 @@ def stage4():
         st.rerun() 
         
     
-    accuracies2 = load_train_models2()
-    # Extract numeric accuracies and find the highest one
+   
     # Step 1: Upload the pre-trained model
     csv_file_path2 = "C:/Users/Admin/Documents/ITE105/LabFinal/regressionmodel.joblib"
     try:
