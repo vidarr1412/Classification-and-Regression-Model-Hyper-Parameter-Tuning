@@ -15,10 +15,10 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import LeaveOneOut, train_test_split
-from sklearn.tree import DecisionTreeClassifier  # Import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier  
 from sklearn.metrics import accuracy_score, log_loss, classification_report, confusion_matrix, roc_auc_score, roc_curve
 import numpy as np
-from sklearn.naive_bayes import GaussianNB  # Import GaussianNB
+from sklearn.naive_bayes import GaussianNB  
 import os
 st.markdown("""
             <style>
@@ -31,10 +31,8 @@ st.markdown("""
 
                </style>
         """, unsafe_allow_html=True)  
-# Stage 1: Load dataset, train models, and show accuracy results
 @st.cache_resource
 def load_and_train_models():
-    # Load dataset
     csv_file_path = "C:/Users/Admin/Documents/ITE105/Lab3/heart_failure_clinical_records_dataset.csv"
     try:
         dataframe = pd.read_csv(csv_file_path)
@@ -44,121 +42,93 @@ def load_and_train_models():
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
-    # Split features and target variable
     X = dataframe.drop('DEATH_EVENT', axis=1)
     y = dataframe['DEATH_EVENT']
 
-    # Train-test split parameters
     test_size = 0.2
     random_seed = 42
     
     
-    # Initialize accuracies list
     accuracies = []
 
-    # Decision Tree model
-    
+        
     test_size = 0.2
     random_seed = 42
     max_depth = 20
     min_samples_split = 10
     min_samples_leaf = 10
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
 
     model = DecisionTreeClassifier(
     max_depth=max_depth,
-    min_samples_split=min_samples_split,  # Use min_samples_split parameter
-    min_samples_leaf=min_samples_leaf,    # Use min_samples_leaf parameter
-    random_state=random_seed
+    min_samples_split=min_samples_split,      min_samples_leaf=min_samples_leaf,        random_state=random_seed
         )
 
-        # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "DC", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
 
 
 
-    #GS
     var_smoothing=-9
     test_size=0.2
     random_seed=42
         
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
     var_smoothing_value = 10 ** var_smoothing
 
     model = GaussianNB(var_smoothing=var_smoothing_value)
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "GS", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
    
 
-    #gradient
     test_size = 0.3
     random_seed = 42
     n_estimators = 20
     learning_rate = 0.2
     max_depth = 3
-    #RANDOM SEED   42
-    #N ESTIMATORS 20
-    #LR 0.20
-    #MAX DEPTH6 82.94
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
-    # Initialize the Gradient Boosting Classifier
     model = GradientBoostingClassifier(
         n_estimators=n_estimators,
         learning_rate=learning_rate,
@@ -168,31 +138,25 @@ def load_and_train_models():
 
 
 
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "Gradient Boosting", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
@@ -202,101 +166,79 @@ def load_and_train_models():
 
 
 
-    #near
     test_size =0.2
     random_seed =42
     n_neighbors = 25
     metric = "euclidean"
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
     model = KNeighborsClassifier(n_neighbors=n_neighbors, metric=metric)
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "KNN", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
-    # Display the table in Streamlit
-
+    
    
-    #st.title("Logistic Regression Classifier with LOOCV")
+    
 
-
-    ##LGRC
     test_size = 0.2
     random_seed = 42
     solver = "liblinear"
     penalty = "l1"
     C = 0.20
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
-    #st.header("Leave-One-Out Cross-Validation (LOOCV)")
     model = LogisticRegression(solver=solver, penalty=penalty, C=C, max_iter=1000)
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "LG", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
    
 
-    # Display the table in Streamlit
+    
 
-
-    #st.title("Multi-Layer Perceptron Classifier with LOOCV")
-
+    
     hidden_layer_sizes = 25
     learning_rate = "adaptive"
     activation = "logistic"
     max_iter = 100
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
@@ -307,34 +249,27 @@ def load_and_train_models():
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "MLP", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
-    # Display the table in Streamlit
-
+    
  
-    #st.title("Random Forest Classifier with LOOCV")
-
+    
     n_estimators = 50
     max_depth = 50
     random_state = 42
@@ -343,39 +278,31 @@ def load_and_train_models():
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "RFT", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
 
 
-    # Display the table in Streamli
-
+    
   
 
-    #st.title("Perceptron Classifier with LOOCV")
     max_iter = 100
     random_state = 42
 
-    # Perceptron model
     model = Perceptron(max_iter=max_iter, random_state=random_state)
     laccuracies = []
     log_losses = []
@@ -389,63 +316,51 @@ def load_and_train_models():
         y_pred = model.predict(X_test)
         loocv_accuracies.append(accuracy_score([y_test], [y_pred]))
         y_true.append(y_test)
-        try:
-            y_probs.append(model.decision_function(X_test)[0])  # For log loss and AUC
-        except AttributeError:
-            y_probs.append(0)  # Handle cases where decision function isn't supported
-
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+    try:
+        y_probs.append(model.decision_function(X_test)[0])          
+    except AttributeError:
+        y_probs.append(0)  
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "Perceptron", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
-    # Display the table in Streamlit
-
-
     
 
     
-    #st.title("SVM Classifier with LOOCV")
+
+    
     kernel = "sigmoid"
     C = 0.1
     random_state =42
 
-    # SVM model
     model = SVC(kernel=kernel, C=C, probability=True, random_state=random_state)
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies.append({"Model": "svm", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
 
-    # Display the accuracies and button to proceed
-
+    
     return accuracies
 @st.cache_resource  
 def load_and_train_models2():
-    # Load dataset
     csv_file_path = "C:/Users/Admin/Documents/ITE105/Lab3/heart_failure_clinical_records_dataset.csv"
     try:
         dataframe = pd.read_csv(csv_file_path)
@@ -455,121 +370,92 @@ def load_and_train_models2():
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
-    # Split features and target variable
     X = dataframe.drop('DEATH_EVENT', axis=1)
     y = dataframe['DEATH_EVENT']
 
-    # Train-test split parameters
     test_size = 0.2
     random_seed = 42
     
     
-    # Initialize accuracies list
     accuracies2 = []
 
-    # Decision Tree model
-    
+        
     test_size = 0.2
     random_seed = 42
     max_depth = 20
     min_samples_split = 10
     min_samples_leaf = 10
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
 
     model = DecisionTreeClassifier(
     max_depth=max_depth,
-    min_samples_split=min_samples_split,  # Use min_samples_split parameter
-    min_samples_leaf=min_samples_leaf,    # Use min_samples_leaf parameter
-    random_state=random_seed
+    min_samples_split=min_samples_split,      min_samples_leaf=min_samples_leaf,        random_state=random_seed
         )
 
-        # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "DC", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
 
 
 
-    #GS
     var_smoothing=-9
     test_size=0.2
     random_seed=42
         
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
     var_smoothing_value = 10 ** var_smoothing
 
     model = GaussianNB(var_smoothing=var_smoothing_value)
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "GS", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
    
-    #gradient
     test_size = 0.3
     random_seed = 42
     n_estimators = 20
     learning_rate = 0.2
     max_depth = 3
-    #test_size = 0.3
-    #random_seed = 42
-    #n_estimators = 10
-    #learning_rate = 0.2
-    #max_depth = 2 85.28
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
-    # Initialize the Gradient Boosting Classifier
     model = GradientBoostingClassifier(
         n_estimators=n_estimators,
         learning_rate=learning_rate,
@@ -578,135 +464,103 @@ def load_and_train_models2():
     )
 
 
-     #RANDOM SEED   938
-    #N ESTIMATORS 511
-    #LR 0.20
-    #MAX DEPTH6 82.94
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "Gradient Boosting", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
 
 
 
-    #near
     test_size =0.2
     random_seed =42
     n_neighbors = 25
     metric = "euclidean"
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
     model = KNeighborsClassifier(n_neighbors=n_neighbors, metric=metric)
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "KNN", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
-    # Display the table in Streamlit
-
+    
    
-    #st.title("Logistic Regression Classifier with LOOCV")
+    
 
-
-    ##LGRC
     test_size = 0.2
     random_seed = 42
     solver = "liblinear"
     penalty = "l1"
     C = 0.20
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
 
-    #st.header("Leave-One-Out Cross-Validation (LOOCV)")
     model = LogisticRegression(solver=solver, penalty=penalty, C=C, max_iter=1000)
-    # Initialize lists to store results for each iteration
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "LG", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
    
 
-    # Display the table in Streamlit
+    
 
-
-    #st.title("Multi-Layer Perceptron Classifier with LOOCV")
-
+    
     hidden_layer_sizes = 25
     learning_rate = "adaptive"
     activation = "logistic"
     max_iter = 100
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
@@ -717,34 +571,27 @@ def load_and_train_models2():
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "MLP", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
-    # Display the table in Streamlit
-
+    
  
-    #st.title("Random Forest Classifier with LOOCV")
-
+    
     n_estimators = 50
     max_depth = 50
     random_state = 42
@@ -753,39 +600,31 @@ def load_and_train_models2():
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "RFT", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
 
 
-    # Display the table in Streamli
-
+    
   
 
-    #st.title("Perceptron Classifier with LOOCV")
     max_iter = 100
     random_state = 42
 
-    # Perceptron model
     model = Perceptron(max_iter=max_iter, random_state=random_state)
     laccuracies = []
     log_losses = []
@@ -800,60 +639,48 @@ def load_and_train_models2():
         loocv_accuracies.append(accuracy_score([y_test], [y_pred]))
         y_true.append(y_test)
         try:
-            y_probs.append(model.decision_function(X_test)[0])  # For log loss and AUC
+            y_probs.append(model.decision_function(X_test)[0])          
         except AttributeError:
-            y_probs.append(0)  # Handle cases where decision function isn't supported
-
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+            y_probs.append(0)  
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "Perceptron", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
-    # Display the table in Streamlit
-
-
     
 
     
-    #st.title("SVM Classifier with LOOCV")
+
+    
     kernel = "sigmoid"
     C = 0.1
     random_state =42
 
-    # SVM model
     model = SVC(kernel=kernel, C=C, probability=True, random_state=random_state)
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
 
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     accuracies2.append({"Model": "svm", "Mean Accuracy": f"{accuracy * 100:.2f}%"})
     
 
-    # Display the accuracies and button to proceed
-
+    
     return accuracies2
-# Stage 1: Load dataset, train models, and show accuracy results
 
 def stage1():
     
@@ -873,24 +700,18 @@ def stage1():
         st.session_state.stage = 4
         st.rerun() 
     st.success("Dataset loaded successfully!")
-    # Load data and train models using cached function
-    # Load data and train models using cached function
     accuracies2 = load_and_train_models2()
 
-    # Display the dataframe only once here in Stage 1
-    
+        
     
 
-    # Display the accuracies in a dataframe format
-   
+       
     
     accuracy_df = pd.DataFrame(accuracies2)
 
-    # Find the min and max MAE
     min_mae = accuracy_df["Mean Accuracy"].min()
     max_mae = accuracy_df["Mean Accuracy"].max()
 
-    # Apply highlighting to the DataFrame
     def highlight_mae(row):
         if row["Mean Accuracy"] == max_mae:
             return ['background-color: green; color: white;'] * len(row)
@@ -898,40 +719,32 @@ def stage1():
         else:
             return [''] * len(row)
 
-    # Style the DataFrame
     styled_df = accuracy_df.style.apply(highlight_mae, axis=1)
 
-    # Display the table with a title
     st.write("Table 1. Machine Learning MAE Results")
     st.dataframe(styled_df)
     
 
     if "accuracies2" not in st.session_state:
         st.error("No accuracy data found. Please go back to Stage 1.")
-        return  # Exit if accuracies are not available+
+        return      
     
     
-    
-# Get the stored accuracies from session state
     accuracies2 = st.session_state.accuracies2
 
-    # Extract numeric accuracies and find the lowest and highest one
     try:
         accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
         
-        # Find the lowest accuracy
         lowest_accuracy = min(accuracies_numeric)
         lowest_model_index = accuracies_numeric.index(lowest_accuracy)
         lowest_model_name = accuracies2[lowest_model_index]["Model"]
         
-        # Find the highest accuracy
         highest_accuracy = max(accuracies_numeric)
         highest_model_index = accuracies_numeric.index(highest_accuracy)
         highest_model_name = accuracies2[highest_model_index]["Model"]
         st.markdown("<p style='font-size:12px;margin-top:30px'>"
                 " </p>", 
                 unsafe_allow_html=True)
-        # Create the justified text with color highlights
         message = f"""
         <div style="text-align: justify;">
             The table highlights 10 Machine Learning algorithms with Mean Accuracy results. 
@@ -943,16 +756,13 @@ def stage1():
         </div>
         """
         
-        # Display the styled message
         st.markdown(message, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"An error occurred: {e}")
     st.markdown("<p style='font-size:12px;margin-top:30px'>"
                 " </p>", 
                 unsafe_allow_html=True)
-    # Button to proceed to Stage 2
-    
-# Stage 2: Show the accuracy comparison as a bar chart
+        
 import plotly.graph_objects as go
 def stage2():
     st.markdown("<h1 style='text-align: center;'>Heart Failure Classification Model Tester and Trainer</h1>", unsafe_allow_html=True)
@@ -970,64 +780,46 @@ def stage2():
     elif st.sidebar.button("Model Prediction"):
         st.session_state.stage = 4
         st.rerun() 
-    # Ensure that accuracies are available from session state
     if "accuracies2" not in st.session_state:
         st.error("No accuracy data found. Please go back to Stage 1.")
-        return  # Exit if accuracies are not available+
-    
-    # Get the stored accuracies from session state
+        return      
     accuracies2 = st.session_state.accuracies2
 
     accuracies2 = st.session_state.accuracies2
 
-    #Bar Graph
     models = [accuracy["Model"] for accuracy in accuracies2]
     accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
-    # Create a Plotly bar chart
     max_accuracy = max(accuracies_numeric)
     min_accuracy = min(accuracies_numeric)
 
-        # Create a color list for the bars
     colors = ['green' if accuracy == max_accuracy else 'red' if accuracy == min_accuracy else 'skyblue' for accuracy in accuracies_numeric]
 
 
     fig = go.Figure()
 
-    # Add the bar chart
     fig.add_trace(go.Bar(
         x=models,
         y=accuracies_numeric,
         marker=dict(color=colors),
-        hoverinfo='x+y',  # This ensures only model and MAE are shown in hover
-    ))
+        hoverinfo='x+y',      ))
 
-    # Set title and labels with larger font sizes
     fig.update_layout(
         title="Model Accuracy Comparison",
         title_font=dict(size=30, color='white'),
-        title_x=0.25,  # Centers the title
-        xaxis_title="Model",
+        title_x=0.25,          xaxis_title="Model",
         xaxis_title_font=dict(size=30, color='white'),
         yaxis_title="Mean Accuracy",
         yaxis_title_font=dict(size=30, color='white'),
         xaxis=dict(tickangle=25, tickfont=dict(size=15, color='white')),
          yaxis=dict(
         tickfont=dict(size=15, color='white'),
-        tickvals=[0, 20,40,60,80,100],  # Custom y-axis tick values
-        range=[0, 100],  
+        tickvals=[0, 20,40,60,80,100],          range=[0, 100],  
     ),
-        plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
-        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-        width=1400,  # Set the width of the figure
-        height=600,  # Set the height of the figure
-    )
+        plot_bgcolor='rgba(0,0,0,0)',          paper_bgcolor='rgba(0,0,0,0)',          width=1400,          height=600,      )
 
-    # Make the bars zoom in when hovered by adding hover effects
-    
-    # Display the Plotly figure in Streamlit
+        
     st.plotly_chart(fig, use_container_width=True)
 
-    # Button to go back to Stage 1
     st.markdown("<p style='font-size:12px;margin-top:30px'>"
                 " </p>", 
                 unsafe_allow_html=True)
@@ -1035,17 +827,14 @@ def stage2():
     try:
         accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
         
-        # Find the lowest accuracy
         lowest_accuracy = min(accuracies_numeric)
         lowest_model_index = accuracies_numeric.index(lowest_accuracy)
         lowest_model_name = accuracies2[lowest_model_index]["Model"]
         
-        # Find the highest accuracy
         highest_accuracy = max(accuracies_numeric)
         highest_model_index = accuracies_numeric.index(highest_accuracy)
         highest_model_name = accuracies2[highest_model_index]["Model"]
         
-        # Create the justified text with color highlights
         message = f"""
         <div style="text-align: justify;">
             The table highlights 10 Machine Learning algorithms with Mean Accuracy results. 
@@ -1057,21 +846,17 @@ def stage2():
         </div>
         """
         
-        # Display the styled message
         st.markdown(message, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"An error occurred: {e}")
-    # Button to go back to Stage 1.
-    st.markdown("<p style='font-size:12px;margin-top:30px'>"
+        st.markdown("<p style='font-size:12px;margin-top:30px'>"
                 " </p>", 
                 unsafe_allow_html=True)
     
     
-# Stage 3: Model selection and hyperparameter tuning
 def stage3():
     st.markdown("<h1 style='text-align: center;'>Heart Failure Classification Model Tester and Trainer</h1>", unsafe_allow_html=True)
     st.subheader("Model Hyper Parameter Tuning")
-    # Load model accuracies
     st.sidebar.title("NAVIGATION")
 
     if st.sidebar.button("Model Table Summary"):
@@ -1090,17 +875,13 @@ def stage3():
 
     if "accuracies2" not in st.session_state:
         st.error("No accuracy data found. Please go back to Stage 1.")
-        return  # Exit if accuracies are not available+
-    
-    # Get the stored accuracies from session state
+        return      
     accuracies2 = st.session_state.accuracies2
     
-    # Extract numeric accuracies and find the highest one
     accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
     highest_accuracy = max(accuracies_numeric)
     highest_model_index = accuracies_numeric.index(highest_accuracy)
     
-    # Load dataset
     csv_file_path = "C:/Users/Admin/Documents/ITE105/Lab3/heart_failure_clinical_records_dataset.csv"
     try:
         dataframe = pd.read_csv(csv_file_path)
@@ -1112,41 +893,38 @@ def stage3():
         st.error(f"An error occurred: {e}")
         return
     
-    # Split features and target variable
     X = dataframe.drop('DEATH_EVENT', axis=1)
     y = dataframe['DEATH_EVENT']
     
-    # Model selection based on highest accuracy
-    if highest_model_index == 0:  # Decision Tree
+    if highest_model_index == 0:          
         st.session_state.selected_model = "dt"
         dt_tuning(X, y)
-    elif highest_model_index == 1:  # Gaussian NB
+    elif highest_model_index == 1:          
         st.session_state.selected_model = "ds"
         gaussian_nb_tuning(X, y)
-    elif highest_model_index == 2:  # Gaussian NB
+    elif highest_model_index == 2:          
         st.session_state.selected_model = "gbm"
         gbm_tuning(X, y)
     
-    elif highest_model_index == 3:  # Gaussian NB
+    elif highest_model_index == 3:          
         st.session_state.selected_model = "knn"
-        knn_tuning(X, y)#KNN
-    elif highest_model_index == 4:  # Gaussian NB
+        knn_tuning(X, y)    
+    elif highest_model_index == 4:          
         st.session_state.selected_model = "knn"
         lg_tuning(X, y)
-    elif highest_model_index == 5:  # Gaussian NB
+    elif highest_model_index == 5:          
         st.session_state.selected_model = "mlp"
         mlp_tuning(X, y)
-    elif highest_model_index == 6:  # Gaussian NB
+    elif highest_model_index == 6:          
         st.session_state.selected_model = "rft"
         rft_tuning(X, y)
-    elif highest_model_index == 7:  # Gaussian NB
+    elif highest_model_index == 7:          
         st.session_state.selected_model = "perceptron"
         perceptron_tuning(X, y)  
-    else:  # Gradient Boosting
+    else:          
         st.session_state.selected_model = "svm"
         svm_tuning(X, y)
 
-# Decision Tree Hyperparameter Tuning
 def dt_tuning(X, y):
     st.subheader("Decision Tree Tuning")
     test_size = st.slider("Test Size", 0.1, 0.5, 0.2,key="test5")
@@ -1161,7 +939,6 @@ def dt_tuning(X, y):
     
     perform_loocv(X, y, model, "dt")
 
-# Gaussian Naive Bayes Hyperparameter Tuning
 def gaussian_nb_tuning(X, y):
     st.subheader("Gaussian NB Tuning")
     var_smoothing = st.number_input('Var Smoothing (log-scale)', -15, -1, -9, 1,value = -9)
@@ -1173,78 +950,53 @@ def gaussian_nb_tuning(X, y):
 
     perform_loocv(X, y, model, "gs")
 
-# Gradient Boosting Hyperparameter Tuning
 def gbm_tuning(X,y):
-    #goal is ma labwan ni82.61%
-    #current highest sa gbm is random seed 42,n estimators 10,lr 0.2 , md = 2
-    
+            
     if st.button("Original Review Table Summary"):
         accuracies2 = st.session_state.accuracies2
 
-        #Bar Graph
         models = [accuracy["Model"] for accuracy in accuracies2]
         accuracies_numeric = [float(accuracy["Mean Accuracy"].rstrip('%')) for accuracy in accuracies2]
-        # Create a Plotly bar chart
         max_accuracy = max(accuracies_numeric)
         min_accuracy = min(accuracies_numeric)
 
-        # Create a color list for the bars
         colors = ['green' if accuracy == max_accuracy else 'red' if accuracy == min_accuracy else 'skyblue' for accuracy in accuracies_numeric]
 
         fig = go.Figure()
 
-        # Add the bar chart
         fig.add_trace(go.Bar(
             x=models,
             y=accuracies_numeric,
             marker=dict(color=colors),
-            hoverinfo='x+y',  # This ensures only model and MAE are shown in hover
-        ))
+            hoverinfo='x+y',          ))
 
-        # Set title and labels with larger font sizes
         fig.update_layout(
             title="Model Accuracy Comparison",
             title_font=dict(size=30, color='white'),
-            title_x=0.25,  # Centers the title
-            xaxis_title="Model",
+            title_x=0.25,              xaxis_title="Model",
             xaxis_title_font=dict(size=30, color='white'),
             yaxis_title="Mean Accuracy",
             yaxis_title_font=dict(size=30, color='white'),
             xaxis=dict(tickangle=25, tickfont=dict(size=15, color='white')),
             yaxis=dict(
             tickfont=dict(size=15, color='white'),
-            tickvals=[0, 20,40,60,80,100],  # Custom y-axis tick values
-            range=[0, 100],  
+            tickvals=[0, 20,40,60,80,100],              range=[0, 100],  
         ),
-            plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
-            paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-            width=1400,  # Set the width of the figure
-            height=600,  # Set the height of the figure
-        )
+            plot_bgcolor='rgba(0,0,0,0)',              paper_bgcolor='rgba(0,0,0,0)',              width=1400,              height=600,          )
 
-        # Make the bars zoom in when hovered by adding hover effects
-        
-        # Display the Plotly figure in Streamlit
+                
         st.plotly_chart(fig, use_container_width=True)
 
     
         if st.button("close"):
             st.plotly_chart(fig, use_container_width=False)
-                # Display the Plotly figure in Streamlit
     test_size = 0.2
     random_seed = st.slider("Random seed",min_value=1,max_value=1000,value=42) 
     n_estimators =  st.slider("N Estimators",min_value=10,max_value=500,value=20,step=10) 
     learning_rate =  st.number_input("Learning Rate",min_value=0.005,max_value=1.00,value=0.20) 
     max_depth =  st.slider("Max Depth",min_value=1,max_value=50,value=3) 
-    #result atm 11/30 2:35 is 79.26
-    # Train-test split
-    
-    #RANDOM SEED   42
-    #N ESTIMATORS 20
-    #LR 0.20
-    #MAX DEPTH6 82.94
-
-    # Initialize the Gradient Boosting Classifier
+            
+                
     model = GradientBoostingClassifier(
         n_estimators=n_estimators,
         learning_rate=learning_rate,
@@ -1286,38 +1038,31 @@ def mlp_tuning(X, y):
     "Hidden Layer Sizes",
     min_value=1,
     max_value=100,
-    value=25,  # Default value
-    step=1
+    value=25,      step=1
     )
 
-    # Slider for `max_iter`
     max_iter = st.slider(
         "Maximum Iterations",
         min_value=100,
         max_value=1000,
-        value=100,  # Default value
-        step=50
+        value=100,          step=50
     )
 
-    # Slider for `learning_rate` (mapped to options via indices)
     learning_rate_options = ["constant", "invscaling", "adaptive"]
     learning_rate_index = st.slider(
         "Learning Rate (Index)",
         min_value=0,
         max_value=2,
-        value=2,  # Default: "adaptive"
-        step=1
+        value=2,          step=1
     )
     learning_rate = learning_rate_options[learning_rate_index]
 
-    # Slider for `activation` (mapped to options via indices)
     activation_options = ["identity", "logistic", "tanh", "relu"]
     activation_index = st.slider(
         "Activation Function (Index)",
         min_value=0,
         max_value=3,
-        value=1,  # Default: "logistic"
-        step=1
+        value=1,          step=1
     )
     activation = activation_options[activation_index]
   
@@ -1358,33 +1103,27 @@ def svm_tuning(X, y):
     perform_loocv(X, y, model, "svm")
 
 
-# Perform LOOCV and display results
 def perform_loocv(X, y, model, model_name):
     test_size=0.2
     loocv_accuracies = []
     loocv_log_losses = []
     loocv_probs = []
 
-    # Perform LOOCV
     loocv = LeaveOneOut()
     for train_index, test_index in loocv.split(X):
         X_train_loocv, X_test_loocv = X.iloc[train_index], X.iloc[test_index]
         y_train_loocv, y_test_loocv = y.iloc[train_index], y.iloc[test_index]
 
-        # Fit the model
         model.fit(X_train_loocv, y_train_loocv)
     
-        # Predict
         y_pred = model.predict(X_test_loocv)
         y_prob = model.predict_proba(X_test_loocv)[:, 1]
 
-        # Evaluate
         loocv_accuracies.append(accuracy_score(y_test_loocv, y_pred))
         loocv_log_losses.append(log_loss([y_test_loocv], [y_prob], labels=[0, 1]))
         loocv_probs.extend(y_prob)
 
-    # Calculate mean accuracy and log loss
-    accuracy = np.mean(loocv_accuracies)
+        accuracy = np.mean(loocv_accuracies)
     mean_log_loss = np.mean(loocv_log_losses)
     st.write(f"The model with the highest accuracy is : {model_name}, with a mean Accuracy: {accuracy * 100:.2f}%")
     st.markdown("<p style='font-size:12px;margin-top:30px'>"
@@ -1404,7 +1143,6 @@ def perform_loocv(X, y, model, model_name):
     )
     
 def stage4():
-    # Load model accuracies
     st.sidebar.title("NAVIGATION")
 
     if st.sidebar.button("Model Table Summary"):
@@ -1420,8 +1158,6 @@ def stage4():
         
         st.rerun() 
     st.title("Heart Failure Prediction Application")
-    # Extract numeric accuracies and find the highest one
-    # Step 1: Upload the pre-trained model
     csv_file_path2 = "C:/Users/Admin/Documents/ITE105/LabFinal/classificationmodel.joblib"
     try:
         model = joblib.load(csv_file_path2)
@@ -1430,7 +1166,6 @@ def stage4():
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
-    # Input form for user data
     age = st.number_input("Age", min_value=0, max_value=120, value=30)
     anaemia = st.selectbox("Anaemia (0: No, 1: Yes)", [0, 1])
     creatinine_phosphokinase = st.number_input("Creatinine Phosphokinase Level", min_value=0)
@@ -1442,12 +1177,9 @@ def stage4():
     serum_sodium = st.number_input("Serum Sodium", min_value=0.0)
     sex = st.selectbox("Sex (0: Female, 1: Male)", [0, 1])
     smoking = st.selectbox("Smoking (0: No, 1: Yes)", [0, 1])
-    time = st.number_input("Time", min_value=0)  # Ensure you include this if it's a feature
-
-    # Create a button to predict
+    time = st.number_input("Time", min_value=0)  
     if st.button("Predict"):
-        # Prepare the input data as a DataFrame
-        input_data = pd.DataFrame({
+            input_data = pd.DataFrame({
             "age": [age],
             "anaemia": [anaemia],
             "creatinine_phosphokinase": [creatinine_phosphokinase],
@@ -1459,49 +1191,42 @@ def stage4():
             "serum_sodium": [serum_sodium],
             "sex": [sex],
             "smoking": [smoking],
-            "time": [time]  # Include 'time' if it's used in the model
-        })
+            "time": [time]          })
 
-        # Make predictions
-        prediction = model.predict(input_data)
-        predicted_probabilities = model.predict_proba(input_data)
+    prediction = model.predict(input_data)
+    predicted_probabilities = model.predict_proba(input_data)
 
-        # Display results
-        if prediction[0] == 1:
-            st.write("Prediction: The patient is likely to have heart failure.")
-        else:
-            st.write("Prediction: The patient is unlikely to have heart failure.")
+    if prediction[0] == 1:
+        st.write("Prediction: The patient is likely to have heart failure.")
+    else:
+        st.write("Prediction: The patient is unlikely to have heart failure.")
 
         
 
 
-# Ensure session state tracking
 if "stage" not in st.session_state:
-    st.session_state.stage = 1  # Default to Stage 1
-
+    st.session_state.stage = 1  
 if "accuracies" not in st.session_state:
-    st.session_state.accuracies = load_and_train_models()  # Load and cache the accuracies if not already done
-
+    st.session_state.accuracies = load_and_train_models()  
 if "accuracies2" not in st.session_state:
-    st.session_state.accuracies2 = load_and_train_models2()  # Load and cache the accuracies if not already done
-
+    st.session_state.accuracies2 = load_and_train_models2()  
 if st.session_state.stage == 1:
-    stage1()  # Show Stage 1
+    stage1()  
 elif st.session_state.stage == 2:
-    stage2()  # Show Stage 2
+    stage2()  
 elif st.session_state.stage == 3:
-    stage3()  # Show Stage 3 with Hyperparameter Tuning
+    stage3()  
 elif st.session_state.stage == 4:
-    stage4()  # Show Stage 3 with Hyperparameter Tuning
+    stage4()  
 def reset_cache():
-    st.cache_data.clear()  # Clears data cache
-    st.cache_resource.clear()  # Clears resource cache
-    st.session_state.clear()  # Clears session state
-    st.experimental_rerun()  # Trigger a rerun to reset the state
+    st.cache_data.clear()      
+    st.cache_resource.clear()      
+    st.session_state.clear()      
+    st.experimental_rerun()      
     stage1()
 
 
 if st.button("Reset Cache"):
-    reset_cache()  # Reset the cache when the button is clicked
+    reset_cache()      
     stage1()
     
